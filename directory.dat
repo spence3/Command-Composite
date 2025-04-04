@@ -1,12 +1,30 @@
-top:
+root:
    file1
-   middle:
-      file2
+   file2
+   dirA:
       file3
-      bottom:
-         file4
+      file4
+      subDirA1:
          file5
-      file6
-   file7
-   another:
-      file8
+         file6
+         subDirA2:
+            file7
+            file8
+      file9
+   dirB:
+      file10
+      subDirB1:
+         file11
+         subDirB2:
+            file12
+            file13
+      file14
+   dirC:
+      subDirC1:
+         subDirC2:
+            subDirC3:
+               file15
+               file16
+         file17
+   file18
+   file19
