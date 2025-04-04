@@ -171,6 +171,8 @@ def main():
 
         if cmd == "q":
             break
+        elif cmd == "clear":
+            os.system('cls' if os.name == 'nt' else 'clear')
         elif cmd in commands:
             commands[cmd].execute()
         else:
