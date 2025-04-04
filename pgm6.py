@@ -3,17 +3,9 @@ from abc import ABC, abstractmethod
 import os
 
 class DirectoryComponent(ABC):
-    def add(self, component):
-        """Add a component to the directory."""
-        pass
+    def add(self, component): pass
 
-    def get_compoenent(self):
-        """Get the component's name or details."""
-        pass
-    
-    def print(self, indent = 0):
-        """Print the component's name. This can be overridden by subclasses."""
-        pass
+    def print(self, indent = 0): pass
     
 class Directory(DirectoryComponent):
     def __init__(self, name):
@@ -47,18 +39,12 @@ class Explorer():
         self.count = 0 #countall
 
     def list(self):
-        """list directories"""
-        for comp in self.current.directories:
-            print(comp.name, end=" ")
-        print()
+        print(" ".join(comp.name for comp in self.current.directories))
 
     def list_all(self):
-        """prints a hierarchical listing of the current 
-        directory subtree (starting from the current node)"""
         self.current.print()
 
     def chdir(self, dir_name):
-        """change directory"""
         for dir in self.current.directories:
             if dir.name == dir_name and isinstance(dir, Directory):
                 self.history.append(self.current)
@@ -66,7 +52,6 @@ class Explorer():
                 return
            
         print("Directory not found")
-        return
 
     def up(self):
         if self.history:
@@ -74,21 +59,12 @@ class Explorer():
             
     def count_curr(self):
         """counts number of files in current directory"""
-        count = 0
-        for file in self.current.directories:
-            if isinstance(file, File):
-                count += 1
-        print(f"Count {count}")
+        print(f"Count {sum(isinstance(f, File) for f in self.current.directories)}")
     
     def count_all(self, directory = None):
         """counts all files in the directory subtree"""
         if directory is None:
             directory = self.current
-
-        #base case(no subdirectories)
-        if not directory.directories:
-            print(f"Count {self.count}")
-            return
 
         for file in directory.directories:
             if isinstance(file, File):
@@ -98,58 +74,34 @@ class Explorer():
 
 class Command(ABC):
     """Command pattern"""
-    def __init__(self, explorer):
-        """initialize command"""
-        pass
-    
-    def execute(self):
-        """execute command"""
-        pass
+    def __init__(self, explorer): self.explorer = explorer
+    def execute(self): pass
 
 class ListCommand(Command):
     """lists the entries in the current directory horizontally"""
-    def __init__(self, explorer):
-        """takes a Directory object as receiver"""
-        self.explorer = explorer
-    
-    def execute(self):
-        """execute command"""
-        self.explorer.list()
+    def execute(self): self.explorer.list()
 
 class ListAllCommand(Command):
-    def __init__(self, explorer):
-        self.explorer = explorer
-
-    def execute(self):
-        self.explorer.list_all()
+    def execute(self): self.explorer.list_all()
 
 class ChdirCommand(Command):
     def __init__(self, explorer, arg):
-        self.explorer = explorer
+        super().__init__(explorer)
         self.arg = arg
 
     def execute(self):
         self.explorer.chdir(self.arg)
         
 class UpCommand(Command):
-    def __init__(self, explorer):
-        self.explorer = explorer
-
-    def execute(self):
-        self.explorer.up()
+    """moves up one directory"""
+    def execute(self): self.explorer.up()
 
 class CountCommand(Command):
     """prints the number of files (not directories) in the current directory"""
-    def __init__(self, explorer):
-        self.explorer = explorer
-
-    def execute(self):
-        self.explorer.count_curr()
+    def execute(self): self.explorer.count_curr()
 
 class CountAllCommand(Command):
-    def __init__(self, explorer):
-        self.explorer = explorer
-
+    """counts all files in the directory subtree"""
     def execute(self):
         self.explorer.count_all()
         print(f"Count {self.explorer.count}")
@@ -160,8 +112,7 @@ class DirectoryFactory():
     """creates directory structure and returns the top directory"""
     def create_directory(self, name):
         with open(name, 'r') as file:
-            data = file.readlines()
-        components = [line.strip('\n') for line in data if line.strip()]
+            components = [line.rstrip('\n') for line in file if line.strip()]
 
         top = None
         stack = [] #helps build the composite structure
@@ -174,7 +125,6 @@ class DirectoryFactory():
             # Check if the component is a directory or a file
             if comp.endswith(":"):
                 new_dir = Directory(dir_name)
-
                 #top of directory
                 if directory == 0:
                     top = new_dir
@@ -196,44 +146,33 @@ class DirectoryFactory():
                     print("Error: File found without a directory.")
         return top
             
-
-
 def main():
-    #creates directory factory
+    """main function"""
     factory = DirectoryFactory()
-    #creates composite structure
     directory = factory.create_directory("directory.dat")
-
-    #creates invoker
-    # invoker = CommandInvoker()
 
     explorer = Explorer(directory)
     while True:
         user_input = input(f"{explorer.current.name}> ").strip().split(" ")
-        command = user_input[0].strip().lower()
-        argument = user_input[1] if len(user_input) > 1 else None #for chdir
+        if not user_input: continue #skip empty input
 
-        #switch statement
-        if command == "list":
-            list_command = ListCommand(explorer)
-            list_command.execute()
-        elif command == "listall":
-            list_all_command = ListAllCommand(explorer)
-            list_all_command.execute()
-        elif command == "chdir":
-            chdir_command = ChdirCommand(explorer, argument)
-            chdir_command.execute()
-        elif command == "up":
-            up_command = UpCommand(explorer)
-            up_command.execute()
-        elif command == "count":
-            count_command = CountCommand(explorer)
-            count_command.execute()
-        elif command == "countall":
-            count_all_command = CountAllCommand(explorer)
-            count_all_command.execute()
-        elif command == "q":
+        cmd, *args = user_input
+        cmd = cmd.strip().lower()
+        arg = args[0] if args else None
+
+        commands = {
+            "list": ListCommand(explorer),
+            "listall": ListAllCommand(explorer),
+            "chdir": ChdirCommand(explorer, arg if arg else None),
+            "up": UpCommand(explorer),
+            "count": CountCommand(explorer),
+            "countall": CountAllCommand(explorer)
+        }
+
+        if cmd == "q":
             break
+        elif cmd in commands:
+            commands[cmd].execute()
         else:
             print("Invalid command")
 
