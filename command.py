@@ -29,15 +29,21 @@ class ChdirCommand(Command):
         
 class UpCommand(Command):
     """moves up one directory"""
-    def execute(self): self.explorer.up()
+    def execute(self):
+        visitor = UpVisitor(self.explorer)
+        self.explorer.current.accept(visitor)
 
 class CountCommand(Command):
     """prints the number of files (not directories) in the current directory"""
-    def execute(self): self.explorer.count_curr()
+    def execute(self): 
+        visitor = CountVisitor(self.explorer)
+        self.explorer.current.accept(visitor)
 
 class CountAllCommand(Command):
     """counts all files in the directory subtree"""
     def execute(self):
-        self.explorer.count_all()
+        visitor = CountAllVisitor(self.explorer)
+        self.explorer.current.accept(visitor)
+        # self.explorer.count_all()
         print(f"Count {self.explorer.count}")
         self.explorer.count = 0 #reset count
