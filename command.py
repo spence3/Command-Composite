@@ -1,5 +1,6 @@
 #import abstract 
 from abc import ABC, abstractmethod
+from visitor import *
 
 class Command(ABC):
     """Command pattern"""
@@ -8,10 +9,14 @@ class Command(ABC):
 
 class ListCommand(Command):
     """lists the entries in the current directory horizontally"""
-    def execute(self): self.explorer.list()
+    def execute(self):
+        visitor = ListVisitor()
+        self.explorer.current.accept(visitor)
 
 class ListAllCommand(Command):
-    def execute(self): self.explorer.list_all()
+    def execute(self):
+        visitor = ListAllVisitor()
+        self.explorer.current.accept(visitor)
 
 class ChdirCommand(Command):
     def __init__(self, explorer, arg):
@@ -19,7 +24,8 @@ class ChdirCommand(Command):
         self.arg = arg
 
     def execute(self):
-        self.explorer.chdir(self.arg)
+        visitor = ChangeDirVisitory(self.explorer, self.arg)
+        self.explorer.current.accept(visitor)
         
 class UpCommand(Command):
     """moves up one directory"""

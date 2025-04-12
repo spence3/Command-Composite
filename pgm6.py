@@ -1,6 +1,6 @@
 from command import *
 from component import *
-from explorer import *
+from explorer import Explorer
 #import abstract 
 from abc import ABC, abstractmethod
 import os
