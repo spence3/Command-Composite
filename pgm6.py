@@ -64,7 +64,9 @@ def main():
             "chdir": ChdirCommand(explorer, arg if arg else None),
             "up": UpCommand(explorer),
             "count": CountCommand(explorer),
-            "countall": CountAllCommand(explorer)
+            "countall": CountAllCommand(explorer),
+            "find": FindCommand(explorer, arg if arg else None),
+            "everything": EverythingCommand(explorer)
         }
 
         if cmd == "q":

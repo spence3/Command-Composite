@@ -47,3 +47,16 @@ class CountAllCommand(Command):
         # self.explorer.count_all()
         print(f"Count {self.explorer.count}")
         self.explorer.count = 0 #reset count
+
+class FindCommand(Command):
+    def __init__(self, explorer, arg):
+        super().__init__(explorer)
+        self.entry_name = arg
+    def execute(self):
+        visitor = FindVisitor(self.entry_name)
+        self.explorer.current.accept(visitor)
+
+class EverythingCommand(Command):
+    def execute(self):
+        visitor = EverythingVisitor()
+        self.explorer.current.accept(visitor)

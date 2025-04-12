@@ -76,3 +76,38 @@ class CountAllVisitor(Visitor):
                 self.explorer.count += 1
             elif isinstance(file, Directory):
                 self.visit_directory(file)
+
+class FindVisitor(Visitor):
+    def __init__(self, entry_name):
+        self.entry_name = entry_name
+        self.found = False
+    def visit_directory(self, directory=None):
+        self.found = self.find_helper(directory)
+        if self.found:
+            print(f"Found {self.entry_name}")
+        else:
+            print(f"Could not find {self.entry_name}")
+    
+    def find_helper(self, directory):
+        for entry in directory.directories:
+            if entry.name == self.entry_name:
+                self.found = True
+                return self.found
+            elif isinstance(entry, Directory):
+                if self.find_helper(entry):
+                    return self.found
+                
+class EverythingVisitor(Visitor):
+    def __init__(self):
+        self.count = 1 #includes the current directory at start
+
+    def visit_directory(self, directory):
+        self.count_everything(directory)
+        print(self.count)
+
+    def count_everything(self, directory):
+        for entry in directory.directories:
+            self.count += 1
+
+            if isinstance(entry, Directory):
+                self.count_everything(entry)
